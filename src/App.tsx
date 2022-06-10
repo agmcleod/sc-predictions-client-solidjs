@@ -1,27 +1,20 @@
-import type { Component } from 'solid-js';
+import { Component, lazy } from 'solid-js'
+import { Routes, Route } from 'solid-app-router'
+import Container from '@suid/material/Container'
 
-import logo from './logo.svg';
-import styles from './App.module.css';
+import logo from './logo.svg'
+import styles from './App.module.css'
+
+const NewGame = lazy(() => import('./pages/NewGame'))
 
 const App: Component = () => {
   return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
-    </div>
-  );
-};
+    <Container>
+      <Routes>
+        <Route path='/' element={<NewGame />} />
+      </Routes>
+    </Container>
+  )
+}
 
-export default App;
+export default App

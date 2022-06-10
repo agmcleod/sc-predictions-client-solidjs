@@ -10,7 +10,7 @@ export const createWSConnection = (): WebSocket | null => {
   if (!WebSocket) {
     return null
   }
-  return new WebSocket(import.meta.env.REACT_APP_WS_URL || '')
+  return new WebSocket(import.meta.env.VITE_WS_URL || '')
 }
 
 export const getClient = (): WebSocket | null => {
