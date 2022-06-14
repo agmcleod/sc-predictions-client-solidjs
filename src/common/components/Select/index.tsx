@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js'
+import type { Component, JSX } from 'solid-js'
 import { For } from 'solid-js'
 
 interface Item {
@@ -8,21 +8,27 @@ interface Item {
 
 interface Props {
   id: string
-  items: Item[]
+  name: string
+  onChange?: JSX.EventHandlerUnion<HTMLSelectElement, Event>
+  items?: Item[]
   label: string
   placeholder?: string
+  value?: string
 }
 
-export function Select({
+export const Select: Component<Props> = ({
   id,
   items,
   label,
+  name,
+  onChange,
   placeholder = 'Select',
-}: Props): Component {
+  value,
+}) => {
   return (
     <div>
       <label for={id}>{label}</label>
-      <select id={id}>
+      <select id={id} onChange={onChange} name={name} value={value}>
         <option value=''>{placeholder}</option>
         <For each={items}>
           {(item) => <option value={item.value}>{item.label}</option>}
