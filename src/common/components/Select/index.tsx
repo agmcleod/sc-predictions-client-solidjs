@@ -1,6 +1,8 @@
 import type { Component, JSX } from 'solid-js'
 import { For } from 'solid-js'
 
+import styles from './styles.module.css'
+
 interface Item {
   label: string
   value: string
@@ -26,7 +28,7 @@ export const Select: Component<Props> = ({
   value,
 }) => {
   return (
-    <div>
+    <div class={styles.container}>
       <label for={id}>{label}</label>
       <select id={id} onChange={onChange} name={name} value={value}>
         <option value=''>{placeholder}</option>

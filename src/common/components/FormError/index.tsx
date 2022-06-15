@@ -1,4 +1,4 @@
-import { Component } from 'solid-js'
+import { Component, Show } from 'solid-js'
 
 import styles from './styles.module.css'
 
@@ -7,8 +7,9 @@ interface FormErrorProps {
 }
 
 export const FormError: Component<FormErrorProps> = (props) => {
-  console.log(props.errorMsg)
-  if (!props.errorMsg) return null
-
-  return <p class={styles.error}>{props.errorMsg}</p>
+  return (
+    <Show when={props.errorMsg}>
+      <p class={styles.error}>{props.errorMsg}</p>
+    </Show>
+  )
 }

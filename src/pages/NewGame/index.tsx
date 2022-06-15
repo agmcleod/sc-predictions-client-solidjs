@@ -1,11 +1,4 @@
-import {
-  Component,
-  createResource,
-  Index,
-  createSignal,
-  Show,
-  createEffect,
-} from 'solid-js'
+import { Component, createResource, Index, createSignal, Show } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import Typography from '@suid/material/Typography'
 import Box from '@suid/material/Box'
@@ -68,10 +61,10 @@ const createOnSubmitHandler = (
 
 const NewGame: Component = () => {
   const [questions] = createResource(fetchQuestions)
-  const [gameQuestions, setGameQuestions] = createStore([{ id: undefined }])
+  const [gameQuestions, setGameQuestions] = createStore<GameQuestion[]>([
+    { id: undefined },
+  ])
   const [errorMessage, setErrorMessage] = createSignal('')
-
-  createEffect(() => console.log(errorMessage()))
 
   return (
     <div>
@@ -85,29 +78,32 @@ const NewGame: Component = () => {
             onSubmit={createOnSubmitHandler(gameQuestions, setErrorMessage)}
           >
             <Index each={gameQuestions}>
-              {(selectedGameQuestion, i) => (
-                <Box sx={{ marginY: 1 }}>
-                  <Select
-                    id='questions'
-                    name='questions'
-                    label='Select Questions'
-                    items={questions()?.map((question) => ({
-                      label: question.body,
-                      value: String(question.id),
-                    }))}
-                    onChange={(ev) => {
-                      setGameQuestions(
-                        (gameQuestion, j) => i === j,
-                        produce(
-                          (gameQuestion) =>
-                            gameQuestion.id === ev.currentTarget.value
+              {(selectedGameQuestion, i) => {
+                const id = selectedGameQuestion().id
+                return (
+                  <Box sx={{ marginY: 1 }}>
+                    <Select
+                      id={`questions_${i}`}
+                      name='questions'
+                      label={`Select Question ${i + 1}`}
+                      items={questions()?.map((question) => ({
+                        label: question.body,
+                        value: String(question.id),
+                      }))}
+                      onChange={(ev) => {
+                        setGameQuestions(
+                          (gameQuestion, j) => i === j,
+                          produce((gameQuestion) => {
+                            const id = parseInt(ev.currentTarget.value, 10)
+                            gameQuestion.id = isNaN(id) ? undefined : id
+                          })
                         )
-                      )
-                    }}
-                    value={selectedGameQuestion().id}
-                  />
-                </Box>
-              )}
+                      }}
+                      value={id ? String(id) : undefined}
+                    />
+                  </Box>
+                )
+              }}
             </Index>
 
             <FormError errorMsg={errorMessage()} />
