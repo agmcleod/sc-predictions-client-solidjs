@@ -1,10 +1,19 @@
-import { Component, createResource, Index, createSignal, Show } from 'solid-js'
+import {
+  Component,
+  createResource,
+  Index,
+  createSignal,
+  Show,
+  Setter,
+} from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
+import { useNavigate, Navigator } from 'solid-app-router'
 import Typography from '@suid/material/Typography'
 import Box from '@suid/material/Box'
 import Grid from '@suid/material/Grid'
 import Button from '@suid/material/Button'
 
+import { useAuth } from '../../common/auth'
 import * as api from '../../common/api'
 import { Question } from '../../common/types/question'
 import { FormError } from '../../common/components/FormError'
@@ -14,28 +23,34 @@ interface GameQuestion {
   id?: number
 }
 
+interface GameResponse {
+  creator: string
+}
+
 const fetchQuestions = async () => {
   return await api.getRequest<Question[]>('/questions')
 }
 
-const createGame = async (questions: GameQuestion[]) => {
-  return await api.postRequest('/games', {
-    question_ids: questions.map((gq) => gq.id),
+const submit = async (
+  gameQuestions: GameQuestion[],
+  navigate: Navigator,
+  setAccessToken?: Setter<string>
+) => {
+  const response = await api.postRequest<GameResponse>('/games', {
+    question_ids: gameQuestions.map((gq) => gq.id),
   })
-}
-
-const submit = () => {
-  // const response = await publicApi.post('games', {
-  //   question_ids: gameQuestions.map((gq) => gq.id),
-  // })
-  // logoutAction()
-  // setAccessToken(response.data.creator)
-  // history.push('/lobby')
+  if (setAccessToken) {
+    setAccessToken(response.creator)
+    // TODO: Clear out other previous data if any here
+    navigate('/lobby')
+  }
 }
 
 const createOnSubmitHandler = (
   gameQuestions: GameQuestion[],
-  setErrorMessage: (message: string) => void
+  setErrorMessage: (message: string) => void,
+  navigate: Navigator,
+  setAccessToken?: Setter<string>
 ) => {
   return (e: Event) => {
     e.preventDefault()
@@ -53,7 +68,7 @@ const createOnSubmitHandler = (
         setErrorMessage('Each question selected must be unique')
       } else {
         setErrorMessage('')
-        submit()
+        submit(gameQuestions, navigate, setAccessToken)
       }
     }
   }
@@ -65,6 +80,8 @@ const NewGame: Component = () => {
     { id: undefined },
   ])
   const [errorMessage, setErrorMessage] = createSignal('')
+  const auth = useAuth() || []
+  const navigate = useNavigate()
 
   return (
     <div>
@@ -75,7 +92,12 @@ const NewGame: Component = () => {
         </Show>
         <Show when={questions()}>
           <form
-            onSubmit={createOnSubmitHandler(gameQuestions, setErrorMessage)}
+            onSubmit={createOnSubmitHandler(
+              gameQuestions,
+              setErrorMessage,
+              navigate,
+              auth[1]?.setAuthToken
+            )}
           >
             <Index each={gameQuestions}>
               {(selectedGameQuestion, i) => {
